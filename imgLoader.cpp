@@ -62,4 +62,29 @@ GLuint LoadDDS (const char * filepath)
         free(buffer);
         return 0;
     }
+
+	GLuint textureID;
+	glGenTextures (1 , &textureID);
+
+	glBindTexture (GL_TEXTURE_2D , textureID);
+
+	unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+	unsigned int offset = 0;
+
+	//mipmap loading
+	for (unsigned int level = 0; level < mipMapCount && (width || height); level++)
+	{
+		unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
+
+		glCompressedTexImage2D (GL_TEXTURE_2D , level , format , width , height , 0 , size,
+								buffer + offset);
+
+		offset += size;
+		width  /= 2;
+		height /= 2;
+	}
+
+	free (buffer);
+	
+	return textureID;
 }
